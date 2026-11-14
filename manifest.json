@@ -1,9 +1,10 @@
 {
   "id": "highlighter",
   "name": "Highlighter",
-  "version": "4.3.0",
+  "version": "1.0",
   "minAppVersion": "0.15.0",
-  "description": "Native PDF highlighter, pen, worksheet text tool with outline-drag, minimal highlight notes, dynamic text toolbar mode, zero-drift zoom geometry, and conflict-free multi-device sync.",
-  "author": "you",
+  "description": "Highlighter is a pseudo-native Obsidian plugin that adds core functionality to the PDF reader.",
+  "author": "yuggo",
   "isDesktopOnly": false
 }
+
