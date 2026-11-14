@@ -1,6 +1,6 @@
 {
-  "id": "highlighter",
-  "name": "Highlighter",
+  "id": "highlighter-ink",
+  "name": "Highlighter Ink",
   "version": "1.0.0",
   "minAppVersion": "1.7.2",
   "description": "Highlighter is a pseudo-native Obsidian plugin that adds core functionality to the PDF reader.",
