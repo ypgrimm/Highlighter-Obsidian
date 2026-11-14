@@ -4,3 +4,4 @@
 Explain that stuff is rendered ontop of the pdf, not inline so its faster and no refreshing
 --- 
 
+![Demo](assets/1.gif)
