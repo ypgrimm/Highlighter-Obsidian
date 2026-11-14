@@ -1,0 +1,471 @@
+/* --- NATIVE PDF TOOLBAR --- */
+.drive-pdf-toolbar-group {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-left: 8px !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+.drive-primary-tools,
+.drive-text-mode-tools,
+.drive-color-group {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 3px !important;
+  flex-shrink: 0 !important;
+}
+
+/* In text mode, primary tools are replaced */
+.drive-pdf-toolbar-group.is-text-mode .drive-primary-tools {
+  display: none !important;
+}
+
+.drive-pdf-toolbar-group:not(.is-text-mode) .drive-text-mode-tools {
+  display: none !important;
+}
+
+.drive-tool-btn.clickable-icon {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 26px !important;
+  height: 26px !important;
+  padding: 4px !important;
+  margin: 0 !important;
+  border-radius: var(--radius-s, 4px) !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  user-select: none !important;
+  outline: none !important;
+}
+
+.drive-tool-btn.clickable-icon:focus,
+.drive-tool-btn.clickable-icon:focus-visible,
+.drive-tool-btn.clickable-icon:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.drive-tool-btn.clickable-icon.is-active {
+  background-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
+}
+
+.drive-bar-divider {
+  width: 1px !important;
+  height: 16px !important;
+  background: var(--background-modifier-border) !important;
+  margin: 0 4px !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+/* Color Swatches */
+.drive-color-swatch-mini {
+  width: 15px !important;
+  height: 15px !important;
+  min-width: 15px !important;
+  min-height: 15px !important;
+  border-radius: 50% !important;
+  border: 2px solid transparent !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 1px !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  box-sizing: border-box !important;
+  transition: transform 0.1s ease;
+  outline: none !important;
+}
+
+.drive-color-swatch-mini:focus,
+.drive-color-swatch-mini:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.drive-color-swatch-mini:hover {
+  transform: scale(1.25);
+}
+
+.drive-color-swatch-mini.is-active {
+  border-color: var(--text-normal) !important;
+  transform: scale(1.2);
+}
+
+/* --- ZERO-DRIFT PAGE OVERLAY HOST --- */
+.drive-pdf-page-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  pointer-events: none !important;
+  z-index: 4;
+  overflow: visible;
+}
+
+/* --- OVERLAY SVG & NATIVE CURSORS --- */
+.drive-annotation-layer {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  pointer-events: none !important;
+  z-index: 1;
+  touch-action: none !important;
+  overflow: visible;
+}
+
+.drive-drawing-active .page {
+  cursor: crosshair !important;
+  user-select: none !important;
+  touch-action: none !important;
+}
+
+.drive-eraser-active .page {
+  cursor: cell !important;
+  user-select: none !important;
+  touch-action: none !important;
+}
+
+.drive-text-active .page {
+  cursor: text !important;
+}
+
+.drive-drawing-active .textLayer,
+.drive-eraser-active .textLayer,
+.drive-drawing-active .drive-text-box,
+.drive-eraser-active .drive-text-box,
+.drive-select-active .drive-text-box {
+  pointer-events: none !important;
+}
+
+/* --- ZERO-DRIFT WORKSHEET TEXT LAYER --- */
+.drive-text-annotation-layer {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  pointer-events: none !important;
+  z-index: 2;
+  overflow: visible;
+}
+
+.drive-text-box {
+  position: absolute;
+  pointer-events: auto;
+  font-size: calc(var(--hl-fs, 16) * var(--hl-unit, 1px));
+  line-height: 1.35 !important;
+  padding: calc(2 * var(--hl-unit, 1px)) calc(4 * var(--hl-unit, 1px));
+  min-width: calc(36 * var(--hl-unit, 1px));
+  min-height: calc(20 * var(--hl-unit, 1px));
+  margin: 0;
+  box-sizing: border-box;
+  background: transparent !important;
+  border: none !important;
+  outline: 1px dashed transparent;
+  outline-offset: 0;
+  border-radius: calc(3 * var(--hl-unit, 1px));
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  cursor: text;
+}
+
+/* Only show dashed outline when in text mode */
+.drive-text-active .drive-text-box {
+  outline: 1px dashed rgba(var(--interactive-accent-rgb), 0.35);
+}
+
+.drive-text-active .drive-text-box:hover {
+  outline-color: rgba(var(--interactive-accent-rgb), 0.72);
+}
+
+.drive-text-box.is-editing {
+  outline: 1.5px solid var(--interactive-accent) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  z-index: 10;
+}
+
+.drive-text-box.is-moving {
+  cursor: move !important;
+  opacity: 0.85;
+}
+
+/* Native selection: Only hide when highlighter Select tool is actively running */
+.drive-select-active .textLayer ::selection,
+.drive-select-active .textLayer *::selection {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* --- MINIMAL HIGHLIGHT NOTES UI --- */
+.drive-note-add-pill {
+  position: fixed;
+  z-index: 95;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  opacity: 0.94;
+  transition: transform 0.1s ease, color 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+}
+
+.drive-note-add-pill:hover {
+  color: var(--text-normal);
+  border-color: var(--interactive-accent);
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+.drive-note-add-pill svg {
+  width: 11px;
+  height: 11px;
+}
+
+.drive-note-popover {
+  position: fixed;
+  z-index: 100;
+  width: 256px;
+  max-width: calc(100vw - 24px);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m, 7px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  pointer-events: auto;
+  animation: drivePopoverFadeIn 0.1s ease-out;
+}
+
+@keyframes drivePopoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.drive-note-color-strip {
+  height: 2.5px;
+  width: 100%;
+}
+
+/* Minimal Preview Card */
+.drive-note-preview-wrap {
+  position: relative;
+  padding: 8px 10px 9px 10px;
+}
+
+.drive-note-preview-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--background-primary);
+  border-radius: var(--radius-s, 4px);
+  padding: 1px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.drive-note-popover.is-preview:hover .drive-note-preview-actions {
+  opacity: 1;
+}
+
+.drive-note-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.drive-note-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: var(--radius-s, 4px);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.drive-note-icon-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.drive-note-icon-btn.is-danger:hover {
+  color: var(--text-error, #e03131);
+}
+
+.drive-note-icon-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.drive-note-preview-body {
+  font-family: var(--font-text);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-normal);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.drive-note-preview-body.is-clickable {
+  cursor: text;
+}
+
+/* Minimal Inline Editor Card */
+.drive-note-editor-wrap {
+  padding: 7px 9px 8px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.drive-note-editor-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.drive-note-color-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.drive-note-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  transition: transform 0.1s ease;
+}
+
+.drive-note-color-dot:hover {
+  transform: scale(1.18);
+}
+
+.drive-note-color-dot.is-active {
+  border-color: var(--text-normal);
+  transform: scale(1.15);
+}
+
+.drive-note-textarea {
+  width: 100%;
+  min-height: 54px;
+  max-height: 200px;
+  padding: 6px 7px;
+  margin: 0;
+  border-radius: var(--radius-s, 5px);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary, var(--background-primary));
+  color: var(--text-normal);
+  font-family: var(--font-text);
+  font-size: 13px;
+  line-height: 1.45;
+  resize: none;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.drive-note-textarea:focus {
+  border-color: var(--interactive-accent);
+}
+
+.drive-note-editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.drive-note-btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.drive-note-btn {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-s, 4px);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.drive-note-btn:hover {
+  background: var(--background-modifier-hover);
+}
+
+.drive-note-btn.is-primary {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: transparent;
+}
+
+.drive-note-btn.is-primary:hover {
+  filter: brightness(1.06);
+}

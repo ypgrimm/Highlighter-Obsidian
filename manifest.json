@@ -1,0 +1,9 @@
+{
+  "id": "highlighter",
+  "name": "Highlighter",
+  "version": "4.3.0",
+  "minAppVersion": "0.15.0",
+  "description": "Native PDF highlighter, pen, worksheet text tool with outline-drag, minimal highlight notes, dynamic text toolbar mode, zero-drift zoom geometry, and conflict-free multi-device sync.",
+  "author": "you",
+  "isDesktopOnly": false
+}
