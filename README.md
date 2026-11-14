@@ -9,3 +9,5 @@ Annotations are rendered on top of the PDF rather than inline, making performanc
 ---
 
 ![Demo](assets/1.gif)
+
+![Demo](assets/1.gif)
