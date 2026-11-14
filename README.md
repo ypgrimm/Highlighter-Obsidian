@@ -8,4 +8,7 @@ Annotations are rendered on top of the PDF rather than inline, making performanc
 
 ---
 
-<img width="480" height="480" alt="1" src="https://github.com/user-attachments/assets/727229a9-2bb2-4eb5-974a-e2fb5cf39be7" />
+<p align="center">
+  <img width="480" height="480" alt="1" src="https://github.com/user-attachments/assets/727229a9-2bb2-4eb5-974a-e2fb5cf39be7" />
+</p>
+
