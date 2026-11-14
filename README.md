@@ -2,7 +2,7 @@
 
 **Highlight, draw, type and take notes directly on your PDFs, without ever leaving Obsidian.**
 
-Highlighter adds a full annotation toolbar to Obsidian's built-in PDF viewer. It looks and feels like part of Obsidian, works with mouse, touch and stylus, and keeps your annotations safe across devices with any cloud sync, including Google Drive, iCloud, Dropbox, Syncthing and OGD Sync.
+Highlighter adds a full annotation toolbar to Obsidian's built-in PDF viewer. It looks and feels like part of Obsidian, and keeps your annotations safe across devices with any cloud sync, including Google Drive, iCloud, Dropbox, Syncthing and OGD Sync.
 
 Annotations are drawn on a layer above the PDF instead of being injected into the page, so scrolling stays smooth and pages never refresh. Your original PDF is never modified.
 
