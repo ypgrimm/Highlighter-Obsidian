@@ -1,4 +1,4 @@
-# Highlighter for Obsidian
+# Highlighter Ink for Obsidian
 
 **Highlight, draw, type and take notes directly on your PDFs, without ever leaving Obsidian.**
 
