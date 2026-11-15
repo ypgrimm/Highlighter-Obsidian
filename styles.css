@@ -1,227 +1,225 @@
 /* --- NATIVE PDF TOOLBAR --- */
-.drive-pdf-toolbar-group {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 4px !important;
-  margin-left: 8px !important;
-  flex-shrink: 0 !important;
-  white-space: nowrap !important;
+.workspace-leaf-content div.drive-pdf-toolbar-group.drive-pdf-toolbar-group {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
-.drive-primary-tools,
-.drive-text-mode-tools,
-.drive-color-group {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 3px !important;
-  flex-shrink: 0 !important;
+.workspace-leaf-content div.drive-pdf-toolbar-group > .drive-primary-tools,
+.workspace-leaf-content div.drive-pdf-toolbar-group > .drive-text-mode-tools,
+.workspace-leaf-content div.drive-pdf-toolbar-group > .drive-color-group {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
 }
 
 /* In text mode, primary tools are replaced */
-.drive-pdf-toolbar-group.is-text-mode .drive-primary-tools {
-  display: none !important;
+.workspace-leaf-content div.drive-pdf-toolbar-group.is-text-mode > .drive-primary-tools,
+.workspace-leaf-content div.drive-pdf-toolbar-group:not(.is-text-mode) > .drive-text-mode-tools {
+  display: none;
 }
 
-.drive-pdf-toolbar-group:not(.is-text-mode) .drive-text-mode-tools {
-  display: none !important;
+.workspace-leaf-content .drive-pdf-toolbar-group button.drive-tool-btn.clickable-icon {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 4px;
+  margin: 0;
+  border-radius: var(--radius-s, 4px);
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  font-size: 13px;
+  font-weight: 600;
+  user-select: none;
+  outline: none;
 }
 
-.drive-tool-btn.clickable-icon {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 26px !important;
-  height: 26px !important;
-  padding: 4px !important;
-  margin: 0 !important;
-  border-radius: var(--radius-s, 4px) !important;
-  cursor: pointer !important;
-  flex-shrink: 0 !important;
-  box-sizing: border-box !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  user-select: none !important;
-  outline: none !important;
+.workspace-leaf-content .drive-pdf-toolbar-group button.drive-tool-btn.clickable-icon:focus,
+.workspace-leaf-content .drive-pdf-toolbar-group button.drive-tool-btn.clickable-icon:focus-visible,
+.workspace-leaf-content .drive-pdf-toolbar-group button.drive-tool-btn.clickable-icon:active {
+  outline: none;
+  box-shadow: none;
 }
 
-.drive-tool-btn.clickable-icon:focus,
-.drive-tool-btn.clickable-icon:focus-visible,
-.drive-tool-btn.clickable-icon:active {
-  outline: none !important;
-  box-shadow: none !important;
+.workspace-leaf-content .drive-pdf-toolbar-group button.drive-tool-btn.clickable-icon.is-active,
+.workspace-leaf-content .drive-pdf-toolbar-group button.drive-tool-btn.clickable-icon.is-active:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
 }
 
-.drive-tool-btn.clickable-icon.is-active {
-  background-color: var(--interactive-accent) !important;
-  color: var(--text-on-accent) !important;
-}
-
-.drive-bar-divider {
-  width: 1px !important;
-  height: 16px !important;
-  background: var(--background-modifier-border) !important;
-  margin: 0 4px !important;
-  flex-shrink: 0 !important;
-  display: block !important;
+.workspace-leaf-content .drive-pdf-toolbar-group > .drive-bar-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--background-modifier-border);
+  margin: 0 4px;
+  flex-shrink: 0;
+  display: block;
 }
 
 /* Color Swatches */
-.drive-color-swatch-mini {
-  width: 15px !important;
-  height: 15px !important;
-  min-width: 15px !important;
-  min-height: 15px !important;
-  border-radius: 50% !important;
-  border: 2px solid transparent !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  margin: 0 1px !important;
-  flex-shrink: 0 !important;
-  display: inline-block !important;
-  box-sizing: border-box !important;
+.workspace-leaf-content .drive-pdf-toolbar-group .drive-color-group button.drive-color-swatch-mini {
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  min-height: 15px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  margin: 0 1px;
+  flex-shrink: 0;
+  display: inline-block;
+  box-sizing: border-box;
   transition: transform 0.1s ease;
-  outline: none !important;
+  outline: none;
 }
 
-.drive-color-swatch-mini:focus,
-.drive-color-swatch-mini:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
+.workspace-leaf-content .drive-pdf-toolbar-group .drive-color-group button.drive-color-swatch-mini:focus,
+.workspace-leaf-content .drive-pdf-toolbar-group .drive-color-group button.drive-color-swatch-mini:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
-.drive-color-swatch-mini:hover {
+.workspace-leaf-content .drive-pdf-toolbar-group .drive-color-group button.drive-color-swatch-mini:hover {
   transform: scale(1.25);
 }
 
-.drive-color-swatch-mini.is-active {
-  border-color: var(--text-normal) !important;
+.workspace-leaf-content .drive-pdf-toolbar-group .drive-color-group button.drive-color-swatch-mini.is-active {
+  border-color: var(--text-normal);
   transform: scale(1.2);
 }
 
 /* --- ZERO-DRIFT PAGE OVERLAY HOST --- */
-.drive-pdf-page-overlay {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  pointer-events: none !important;
+.workspace-leaf-content .page[data-page-number] > div.drive-pdf-page-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  pointer-events: none;
   z-index: 4;
   overflow: visible;
 }
 
 /* --- OVERLAY SVG & NATIVE CURSORS --- */
-.drive-annotation-layer {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  pointer-events: none !important;
+.workspace-leaf-content .page[data-page-number] .drive-pdf-page-overlay > svg.drive-annotation-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  pointer-events: none;
   z-index: 1;
-  touch-action: none !important;
+  touch-action: none;
   overflow: visible;
 }
 
-.drive-drawing-active .page {
-  cursor: crosshair !important;
-  user-select: none !important;
-  touch-action: none !important;
+.drive-drawing-active.drive-drawing-active .page[data-page-number] {
+  cursor: crosshair;
+  user-select: none;
+  touch-action: none;
 }
 
-.drive-eraser-active .page {
-  cursor: cell !important;
-  user-select: none !important;
-  touch-action: none !important;
+.drive-eraser-active.drive-eraser-active .page[data-page-number] {
+  cursor: cell;
+  user-select: none;
+  touch-action: none;
 }
 
-.drive-text-active .page {
-  cursor: text !important;
+.drive-text-active.drive-text-active .page[data-page-number] {
+  cursor: text;
 }
 
-.drive-drawing-active .textLayer,
-.drive-eraser-active .textLayer,
-.drive-drawing-active .drive-text-box,
-.drive-eraser-active .drive-text-box,
-.drive-select-active .drive-text-box {
-  pointer-events: none !important;
+.drive-drawing-active.drive-drawing-active .page[data-page-number] .textLayer,
+.drive-eraser-active.drive-eraser-active .page[data-page-number] .textLayer,
+.drive-drawing-active.drive-drawing-active .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box,
+.drive-eraser-active.drive-eraser-active .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box,
+.drive-select-active.drive-select-active .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box {
+  pointer-events: none;
 }
 
 /* --- ZERO-DRIFT WORKSHEET TEXT LAYER --- */
-.drive-text-annotation-layer {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  pointer-events: none !important;
+.workspace-leaf-content .page[data-page-number] .drive-pdf-page-overlay > div.drive-text-annotation-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  pointer-events: none;
   z-index: 2;
   overflow: visible;
 }
 
-.drive-text-box {
+.workspace-leaf-content .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box {
   position: absolute;
   pointer-events: auto;
   font-size: calc(var(--hl-fs, 16) * var(--hl-unit, 1px));
-  line-height: 1.35 !important;
+  line-height: 1.35;
   padding: calc(2 * var(--hl-unit, 1px)) calc(4 * var(--hl-unit, 1px));
   min-width: calc(36 * var(--hl-unit, 1px));
   min-height: calc(20 * var(--hl-unit, 1px));
   margin: 0;
   box-sizing: border-box;
-  background: transparent !important;
-  border: none !important;
+  background: transparent;
+  border: none;
   outline: 1px dashed transparent;
   outline-offset: 0;
   border-radius: calc(3 * var(--hl-unit, 1px));
   white-space: pre-wrap;
   word-break: break-word;
-  user-select: text !important;
-  -webkit-user-select: text !important;
+  user-select: text;
+  -webkit-user-select: text;
   cursor: text;
 }
 
 /* Only show dashed outline when in text mode */
-.drive-text-active .drive-text-box {
+.drive-text-active.drive-text-active .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box {
   outline: 1px dashed rgba(var(--interactive-accent-rgb), 0.35);
 }
 
-.drive-text-active .drive-text-box:hover {
+.drive-text-active.drive-text-active .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box:hover {
   outline-color: rgba(var(--interactive-accent-rgb), 0.72);
 }
 
-.drive-text-box.is-editing {
-  outline: 1.5px solid var(--interactive-accent) !important;
-  background: transparent !important;
-  box-shadow: none !important;
+.workspace-leaf-content .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box.is-editing.is-editing.is-editing {
+  outline: 1.5px solid var(--interactive-accent);
+  background: transparent;
+  box-shadow: none;
   z-index: 10;
 }
 
-.drive-text-box.is-moving {
-  cursor: move !important;
+.workspace-leaf-content .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box.is-moving {
+  cursor: move;
   opacity: 0.85;
 }
 
 /* Native selection: Only hide when highlighter Select tool is actively running */
-.drive-select-active .textLayer ::selection,
-.drive-select-active .textLayer *::selection {
-  background: transparent !important;
-  background-color: transparent !important;
-  color: inherit !important;
+.drive-select-active.drive-select-active .page[data-page-number] .textLayer ::selection,
+.drive-select-active.drive-select-active .page[data-page-number] .textLayer *::selection {
+  background: transparent;
+  background-color: transparent;
+  color: inherit;
 }
 
 /* --- MINIMAL HIGHLIGHT NOTES UI --- */
