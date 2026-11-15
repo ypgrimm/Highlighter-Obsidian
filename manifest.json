@@ -3,7 +3,7 @@
   "name": "Simple Highlighter",
   "version": "1.0.2",
   "minAppVersion": "1.7.2",
-  "description": "Simple Highlighter is a pseudo-native plugin that adds core functionality to the PDF reader.",
+  "description": "A pseudo-native plugin that adds core functionality to the PDF reader.",
   "author": "Yiangos",
   "authorUrl": "https://github.com/ypgrimm",
   "isDesktopOnly": false
