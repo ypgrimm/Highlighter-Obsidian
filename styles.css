@@ -132,24 +132,41 @@
   overflow: visible;
 }
 
+.drive-drawing-active.drive-drawing-active .pdf-viewer,
 .drive-drawing-active.drive-drawing-active .page[data-page-number] {
   cursor: crosshair;
   user-select: none;
   touch-action: none;
 }
 
+.drive-eraser-active.drive-eraser-active .pdf-viewer,
 .drive-eraser-active.drive-eraser-active .page[data-page-number] {
   cursor: cell;
   user-select: none;
   touch-action: none;
 }
 
+.drive-text-active.drive-text-active .pdf-viewer,
 .drive-text-active.drive-text-active .page[data-page-number] {
   cursor: text;
 }
 
+.drive-select-active.drive-select-active .pdf-viewer,
+.drive-select-active.drive-select-active .page[data-page-number],
+.drive-select-active.drive-select-active .page[data-page-number] .textLayer,
+.drive-select-active.drive-select-active .page[data-page-number] .textLayer * {
+  cursor: text;
+}
+
 .drive-drawing-active.drive-drawing-active .page[data-page-number] .textLayer,
+.drive-drawing-active.drive-drawing-active .page[data-page-number] .annotationLayer,
+.drive-drawing-active.drive-drawing-active .page[data-page-number] .annotationLayer *,
 .drive-eraser-active.drive-eraser-active .page[data-page-number] .textLayer,
+.drive-eraser-active.drive-eraser-active .page[data-page-number] .annotationLayer,
+.drive-eraser-active.drive-eraser-active .page[data-page-number] .annotationLayer *,
+.drive-text-active.drive-text-active .page[data-page-number] .textLayer,
+.drive-text-active.drive-text-active .page[data-page-number] .annotationLayer,
+.drive-text-active.drive-text-active .page[data-page-number] .annotationLayer *,
 .drive-drawing-active.drive-drawing-active .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box,
 .drive-eraser-active.drive-eraser-active .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box,
 .drive-select-active.drive-select-active .page[data-page-number] .drive-text-annotation-layer > div.drive-text-box {
