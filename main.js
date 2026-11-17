@@ -80,6 +80,47 @@ function sanitizeDeviceName(raw) {
     .replace(/-+$/g, "");
 }
 
+function sanitizeCursorColor(rawColor) {
+  if (typeof rawColor !== "string") return "#ffe066";
+  var c = rawColor.trim();
+  if (/^#[0-9a-fA-F]{3,8}$/.test(c)) return c;
+  if (/^(rgb|hsl)a?\(\s*[0-9.,%\s]+\)$/i.test(c)) return c;
+  if (/^[a-zA-Z]{3,20}$/.test(c)) return c;
+  return "#ffe066";
+}
+
+function getContrastOutlineColor(color) {
+  if (!color || typeof color !== "string") return "#1e1e1e";
+  var c = color.trim().toLowerCase();
+  var r = 255, g = 224, b = 102;
+  if (c.startsWith("#")) {
+    var hex = c.slice(1);
+    if (hex.length === 3 || hex.length === 4) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    if (/^[0-9a-f]{6,8}$/.test(hex)) {
+      r = parseInt(hex.slice(0, 2), 16);
+      g = parseInt(hex.slice(2, 4), 16);
+      b = parseInt(hex.slice(4, 6), 16);
+    }
+  } else {
+    var m = c.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (m) {
+      r = parseInt(m[1], 10);
+      g = parseInt(m[2], 10);
+      b = parseInt(m[3], 10);
+    } else if (c === "black" || c === "navy" || c === "darkblue" || c === "maroon") {
+      r = 0; g = 0; b = 0;
+    }
+  }
+  var lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.38 ? "#1e1e1e" : "#ffffff";
+}
+
+function svgToCursorUrl(svg, hotX, hotY, fallback) {
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${hotX} ${hotY}, ${fallback}`;
+}
+
 function quantize(v) {
   return Math.max(0, Math.min(10000, Math.round(v * 10000)));
 }
@@ -635,10 +676,14 @@ class HighlighterSettingTab extends obsidian.PluginSettingTab {
         )
         .addColorPicker((cp) =>
           cp.setValue(c?.color || "#ffe066").onChange(async (val) => {
+            var wasActive = this.plugin.activeColor === c?.color;
             c.color = val;
             await this.plugin.saveSettingsOnly();
+            if (wasActive) {
+              this.plugin.activeColor = c.color;
+              this.plugin.updateToolCursors();
+            }
             this.plugin.updateAllToolbarColors();
-            if (this.plugin.activeColor === c?.color) this.plugin.activeColor = c.color;
           })
         )
         .addExtraButton((b) =>
@@ -683,6 +728,8 @@ class HighlighterPlugin extends obsidian.Plugin {
 
       this.activeTool = "none";
       this.activeColor = this.settings.colors[0]?.color || "#111111";
+      this._lastCursorColor = "";
+      this.updateToolCursors();
 
       this.isDrawing = false;
       this.isErasing = false;
@@ -868,6 +915,9 @@ class HighlighterPlugin extends obsidian.Plugin {
       if (this.renderRafId) window.cancelAnimationFrame(this.renderRafId);
 
       if (this.activeEditingBox) this.activeEditingBox.blur();
+      this.activeEditingBox = null;
+      this.activeTextBoxId = null;
+
       if (this.notePopover && this.notePopover.mode === "edit") {
         this.commitAndCloseNotePopover();
       } else {
@@ -884,6 +934,25 @@ class HighlighterPlugin extends obsidian.Plugin {
         this.destroyViewBinding(binding);
       }
       this.viewBindings.clear();
+
+      var activeCursorClasses = [
+        "drive-drawing-active",
+        "drive-pen-active",
+        "drive-highlighter-active",
+        "drive-eraser-active",
+        "drive-text-active",
+        "drive-select-active"
+      ];
+      this.app.workspace.iterateAllLeaves((leaf) => {
+        var c = leaf.view?.containerEl;
+        if (!c) return;
+        c.classList.remove(...activeCursorClasses);
+        var ic = c.querySelector(".pdf-container");
+        if (ic) ic.classList.remove(...activeCursorClasses);
+      });
+
+      var cursorStyleEl = document.getElementById("drive-highlighter-cursors");
+      if (cursorStyleEl) cursorStyleEl.remove();
 
       document.querySelectorAll(".drive-pdf-toolbar-group").forEach((el) => el.remove());
       document.querySelectorAll(".drive-pdf-page-overlay").forEach((el) => el.remove());
@@ -1364,6 +1433,7 @@ class HighlighterPlugin extends obsidian.Plugin {
         existing.filePath = nextPath;
         existing.restoredFilePath = "";
         existing.appliedViewStateU = 0;
+        this.activeTextBoxId = null;
         this.restorePdfViewStateIfNeeded(existing, false);
         this.scheduleLeafRender(existing, true);
       }
@@ -1489,6 +1559,7 @@ class HighlighterPlugin extends obsidian.Plugin {
       var t = window.setTimeout(() => {
         if (!this.viewBindings.has(view)) return;
         this.injectIntoNativeToolbar(binding.leaf);
+        this.updateCursorMode();
         if (!binding.eventBusBound) this.tryBindPdfJsEventBus(binding);
         this.restorePdfViewStateIfNeeded(binding, false);
         this.observePagesInContainer(binding);
@@ -2669,6 +2740,10 @@ class HighlighterPlugin extends obsidian.Plugin {
     var h = this.history.get(p);
     if (!h || !h.undo.length) return;
 
+    if (this.activeEditingBox) this.activeEditingBox.blur();
+    this.activeEditingBox = null;
+    this.activeTextBoxId = null;
+
     this.closeNotePopover(false);
     this.hideAddNotePill();
 
@@ -2708,6 +2783,10 @@ class HighlighterPlugin extends obsidian.Plugin {
     var p = normalizePath(filePath);
     var h = this.history.get(p);
     if (!h || !h.redo.length) return;
+
+    if (this.activeEditingBox) this.activeEditingBox.blur();
+    this.activeEditingBox = null;
+    this.activeTextBoxId = null;
 
     this.closeNotePopover(false);
     this.hideAddNotePill();
@@ -2865,10 +2944,32 @@ class HighlighterPlugin extends obsidian.Plugin {
     else if (key === (hk.eraser || "e").toLowerCase()) this.setTool("eraser");
   }
 
+  getTargetTextBoxForEdit() {
+    if (this.activeTool !== "text") return null;
+    var box = null;
+    if (this.activeEditingBox && this.activeEditingBox.isConnected) {
+      box = this.activeEditingBox;
+    } else if (this.activeTextBoxId) {
+      box = document.querySelector(`.drive-text-box[data-id="${this.activeTextBoxId}"]`);
+    }
+    if (!box || !box.isConnected) return null;
+    var boxLeaf = this.getLeafForElement(box);
+    var activeLeaf = this.hoveredPdfLeaf || this.app.workspace.activeLeaf;
+    if (boxLeaf && activeLeaf && boxLeaf !== activeLeaf) return null;
+    return box;
+  }
+
   setTool(toolId) {
     if (this.readingDeviceMode) toolId = "none";
     if (this.activeTool === toolId && toolId !== "none") toolId = "none";
     if (this.activeEditingBox && toolId !== "text") this.activeEditingBox.blur();
+    if (toolId !== "text") {
+      this.activeEditingBox = null;
+      this.activeTextBoxId = null;
+      document.querySelectorAll(".drive-text-box").forEach((b) => {
+        if (b.style.cursor) b.style.cursor = "";
+      });
+    }
 
     this.commitAndCloseNotePopover();
     this.hideAddNotePill();
@@ -2898,18 +2999,18 @@ class HighlighterPlugin extends obsidian.Plugin {
   setColor(color) {
     if (this.readingDeviceMode || !color) return;
     this.activeColor = color;
+    this.updateToolCursors();
     document.querySelectorAll(".drive-pdf-toolbar-group .drive-color-swatch-mini").forEach((s) => {
       s.blur();
       if (s.getAttribute("data-color") === color) s.addClass("is-active");
       else s.removeClass("is-active");
     });
 
-    var targetBox =
-      this.activeEditingBox ||
-      (this.activeTextBoxId ? document.querySelector(`.drive-text-box[data-id="${this.activeTextBoxId}"]`) : null);
+    var targetBox = this.getTargetTextBoxForEdit();
     if (targetBox) {
       targetBox.style.color = color;
-      var file = this.getActivePdfFileFallback();
+      var leaf = this.getLeafForElement(targetBox);
+      var file = (leaf ? this.getLeafFile(leaf) : null) || this.getActivePdfFileFallback();
       var id = targetBox.getAttribute("data-id");
       if (file && id) {
         var normPath = normalizePath(file.path);
@@ -3056,11 +3157,10 @@ class HighlighterPlugin extends obsidian.Plugin {
     var cur = !this.settings.textFormatting[prop];
     this.settings.textFormatting[prop] = cur;
 
-    var targetBox =
-      this.activeEditingBox ||
-      (this.activeTextBoxId ? document.querySelector(`.drive-text-box[data-id="${this.activeTextBoxId}"]`) : null);
+    var targetBox = this.getTargetTextBoxForEdit();
     if (targetBox) {
-      var file = this.getActivePdfFileFallback();
+      var leaf = this.getLeafForElement(targetBox);
+      var file = (leaf ? this.getLeafFile(leaf) : null) || this.getActivePdfFileFallback();
       var id = targetBox.getAttribute("data-id");
       if (file && id) {
         var items = this.pdfHighlights[normalizePath(file.path)] || [];
@@ -3082,11 +3182,10 @@ class HighlighterPlugin extends obsidian.Plugin {
     cur = Math.max(8, Math.min(64, cur));
     this.settings.textFormatting.fontSize = cur;
 
-    var targetBox =
-      this.activeEditingBox ||
-      (this.activeTextBoxId ? document.querySelector(`.drive-text-box[data-id="${this.activeTextBoxId}"]`) : null);
+    var targetBox = this.getTargetTextBoxForEdit();
     if (targetBox) {
-      var file = this.getActivePdfFileFallback();
+      var leaf = this.getLeafForElement(targetBox);
+      var file = (leaf ? this.getLeafFile(leaf) : null) || this.getActivePdfFileFallback();
       var id = targetBox.getAttribute("data-id");
       if (file && id) {
         var items = this.pdfHighlights[normalizePath(file.path)] || [];
@@ -3105,9 +3204,7 @@ class HighlighterPlugin extends obsidian.Plugin {
   cycleTextAlignment() {
     if (this.readingDeviceMode) return;
     var order = ["left", "center", "right"];
-    var targetBox =
-      this.activeEditingBox ||
-      (this.activeTextBoxId ? document.querySelector(`.drive-text-box[data-id="${this.activeTextBoxId}"]`) : null);
+    var targetBox = this.getTargetTextBoxForEdit();
     var currentAlign = (targetBox && targetBox.style.textAlign) || this.settings.textFormatting.align || "left";
     var idx = order.indexOf(currentAlign);
     var next = order[(idx + 1) % order.length];
@@ -3119,7 +3216,8 @@ class HighlighterPlugin extends obsidian.Plugin {
 
     if (targetBox) {
       targetBox.style.textAlign = next;
-      var file = this.getActivePdfFileFallback();
+      var leaf = this.getLeafForElement(targetBox);
+      var file = (leaf ? this.getLeafFile(leaf) : null) || this.getActivePdfFileFallback();
       var id = targetBox.getAttribute("data-id");
       if (file && id) {
         var normPath = normalizePath(file.path);
@@ -3137,9 +3235,7 @@ class HighlighterPlugin extends obsidian.Plugin {
 
   toggleList(type) {
     if (this.readingDeviceMode) return;
-    var targetBox =
-      this.activeEditingBox ||
-      (this.activeTextBoxId ? document.querySelector(`.drive-text-box[data-id="${this.activeTextBoxId}"]`) : null);
+    var targetBox = this.getTargetTextBoxForEdit();
     if (!targetBox) return;
 
     var text = targetBox.innerText;
@@ -3170,7 +3266,8 @@ class HighlighterPlugin extends obsidian.Plugin {
     }
 
     targetBox.innerText = lines.join("\n");
-    var file = this.getActivePdfFileFallback();
+    var leaf = this.getLeafForElement(targetBox);
+    var file = (leaf ? this.getLeafFile(leaf) : null) || this.getActivePdfFileFallback();
     var id = targetBox.getAttribute("data-id");
     if (file && id) {
       var normPath = normalizePath(file.path);
@@ -3205,23 +3302,121 @@ class HighlighterPlugin extends obsidian.Plugin {
     });
   }
 
+  updateToolCursors() {
+    if (typeof document === "undefined") return;
+    var c = sanitizeCursorColor(this.activeColor);
+    if (this._lastCursorColor === c && document.getElementById("drive-highlighter-cursors")) return;
+    this._lastCursorColor = c;
+
+    var outline = getContrastOutlineColor(c);
+
+    var penSvg =
+      `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'>` +
+      `<path d='M2 20 L3.5 15.5 L15.5 3.5 L18.5 6.5 L6.5 18.5 Z' fill='#ffffff' stroke='#ffffff' stroke-width='2.6' stroke-linejoin='round' stroke-linecap='round'/>` +
+      `<path d='M3.5 15.5 L15.5 3.5 L18.5 6.5 L6.5 18.5 Z' fill='${c}' stroke='#1e1e1e' stroke-width='1.35' stroke-linejoin='round'/>` +
+      `<path d='M2 20 L3.5 15.5 L6.5 18.5 Z' fill='#ffffff' stroke='#1e1e1e' stroke-width='1.35' stroke-linejoin='round'/>` +
+      `</svg>`;
+
+    var highlighterSvg =
+      `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'>` +
+      `<path d='M2 15.5 L14 3.5 L18.5 8 L6.5 20 H2 Z' fill='#ffffff' stroke='#ffffff' stroke-width='2.6' stroke-linejoin='round'/>` +
+      `<path d='M6 11.5 L2 15.5 V20 H6.5 L10.5 16 Z' fill='${c}' stroke='#1e1e1e' stroke-width='1.35' stroke-linejoin='round'/>` +
+      `<path d='M6 11.5 L14 3.5 L18.5 8 L10.5 16 Z' fill='#ffffff' stroke='#1e1e1e' stroke-width='1.35' stroke-linejoin='round'/>` +
+      `</svg>`;
+
+    var eraserSvg =
+      `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'>` +
+      `<path d='M6.5 19 L2.9 15.4 C2.1 14.6 2.1 13.3 2.9 12.5 L11.5 3.9 C12.3 3.1 13.6 3.1 14.4 3.9 L19.1 8.6 C19.9 9.4 19.9 10.7 19.1 11.5 L11.6 19 Z' fill='#ffffff' stroke='#ffffff' stroke-width='2.6' stroke-linejoin='round'/>` +
+      `<path d='M5.5 19 H18.5' stroke='#ffffff' stroke-width='2.6' stroke-linecap='round'/>` +
+      `<path d='M6.5 19 L2.9 15.4 C2.1 14.6 2.1 13.3 2.9 12.5 L11.5 3.9 C12.3 3.1 13.6 3.1 14.4 3.9 L19.1 8.6 C19.9 9.4 19.9 10.7 19.1 11.5 L11.6 19 Z' fill='#e4e4e7'/>` +
+      `<path d='M6.5 19 L2.9 15.4 C2.1 14.6 2.1 13.3 2.9 12.5 L5.9 9.5 L13.5 17.1 L11.6 19 Z' fill='#ffffff'/>` +
+      `<path d='M6.5 19 L2.9 15.4 C2.1 14.6 2.1 13.3 2.9 12.5 L11.5 3.9 C12.3 3.1 13.6 3.1 14.4 3.9 L19.1 8.6 C19.9 9.4 19.9 10.7 19.1 11.5 L11.6 19 Z' fill='none' stroke='#1e1e1e' stroke-width='1.35' stroke-linejoin='round'/>` +
+      `<path d='M5.9 9.5 L13.5 17.1' stroke='#1e1e1e' stroke-width='1.25' stroke-linecap='round'/>` +
+      `<path d='M5.5 19 H18.5' stroke='#1e1e1e' stroke-width='1.35' stroke-linecap='round'/>` +
+      `</svg>`;
+
+    var textSvg =
+      `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'>` +
+      `<path d='M6 2.5 V9.5 M2.5 6 H9.5' fill='none' stroke='#ffffff' stroke-width='2.6' stroke-linecap='round'/>` +
+      `<path d='M6 2.5 V9.5 M2.5 6 H9.5' fill='none' stroke='#1e1e1e' stroke-width='1.35' stroke-linecap='round'/>` +
+      `<path d='M11 10.5 H18 M14.5 10.5 V18' fill='none' stroke='${outline}' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/>` +
+      `<path d='M11 10.5 H18 M14.5 10.5 V18' fill='none' stroke='${c}' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/>` +
+      `</svg>`;
+
+    var selectSvg =
+      `<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'>` +
+      `<path d='M8 3.5 L11 5 L14 3.5 M11 5 V17 M8 18.5 L11 17 L14 18.5' fill='none' stroke='${outline}' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/>` +
+      `<path d='M8 3.5 L11 5 L14 3.5 M11 5 V17 M8 18.5 L11 17 L14 18.5' fill='none' stroke='${c}' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/>` +
+      `</svg>`;
+
+    var penCur = svgToCursorUrl(penSvg, 2, 20, "crosshair");
+    var hlCur = svgToCursorUrl(highlighterSvg, 2, 20, "crosshair");
+    var eraserCur = svgToCursorUrl(eraserSvg, 4, 19, "cell");
+    var textCur = svgToCursorUrl(textSvg, 6, 6, "text");
+    var selectCur = svgToCursorUrl(selectSvg, 11, 11, "text");
+
+    var css =
+      `.drive-pen-active.drive-pen-active.drive-pen-active .pdf-viewer,` +
+      `.drive-pen-active.drive-pen-active.drive-pen-active .page[data-page-number],` +
+      `.drive-pen-active.drive-pen-active.drive-pen-active .page[data-page-number] .annotationLayer,` +
+      `.drive-pen-active.drive-pen-active.drive-pen-active .page[data-page-number] .annotationLayer *{cursor:${penCur};}\n` +
+      `.drive-highlighter-active.drive-highlighter-active.drive-highlighter-active .pdf-viewer,` +
+      `.drive-highlighter-active.drive-highlighter-active.drive-highlighter-active .page[data-page-number],` +
+      `.drive-highlighter-active.drive-highlighter-active.drive-highlighter-active .page[data-page-number] .annotationLayer,` +
+      `.drive-highlighter-active.drive-highlighter-active.drive-highlighter-active .page[data-page-number] .annotationLayer *{cursor:${hlCur};}\n` +
+      `.drive-eraser-active.drive-eraser-active.drive-eraser-active .pdf-viewer,` +
+      `.drive-eraser-active.drive-eraser-active.drive-eraser-active .page[data-page-number],` +
+      `.drive-eraser-active.drive-eraser-active.drive-eraser-active .page[data-page-number] .annotationLayer,` +
+      `.drive-eraser-active.drive-eraser-active.drive-eraser-active .page[data-page-number] .annotationLayer *{cursor:${eraserCur};}\n` +
+      `.drive-text-active.drive-text-active.drive-text-active .pdf-viewer,` +
+      `.drive-text-active.drive-text-active.drive-text-active .page[data-page-number],` +
+      `.drive-text-active.drive-text-active.drive-text-active .page[data-page-number] .annotationLayer,` +
+      `.drive-text-active.drive-text-active.drive-text-active .page[data-page-number] .annotationLayer *{cursor:${textCur};}\n` +
+      `.drive-select-active.drive-select-active.drive-select-active .pdf-viewer,` +
+      `.drive-select-active.drive-select-active.drive-select-active .page[data-page-number],` +
+      `.drive-select-active.drive-select-active.drive-select-active .page[data-page-number] .textLayer,` +
+      `.drive-select-active.drive-select-active.drive-select-active .page[data-page-number] .textLayer span,` +
+      `.drive-select-active.drive-select-active.drive-select-active .page[data-page-number] .textLayer *{cursor:${selectCur};}`;
+
+    var styleEl = document.getElementById("drive-highlighter-cursors");
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = "drive-highlighter-cursors";
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = css;
+  }
+
   updateCursorMode() {
+    this.updateToolCursors();
+    var classes = [
+      "drive-drawing-active",
+      "drive-pen-active",
+      "drive-highlighter-active",
+      "drive-eraser-active",
+      "drive-text-active",
+      "drive-select-active"
+    ];
     this.app.workspace.iterateAllLeaves((leaf) => {
       if (leaf.isDeferred || leaf.view?.getViewType?.() !== "pdf") return;
       var container = leaf.view?.containerEl;
       if (!container) return;
-      var pdfContainer = container.querySelector(".pdf-container") || container;
-      pdfContainer.classList.remove(
-        "drive-drawing-active",
-        "drive-eraser-active",
-        "drive-text-active",
-        "drive-select-active"
-      );
+      var innerContainer = container.querySelector(".pdf-container");
+      container.classList.remove(...classes);
+      if (innerContainer) innerContainer.classList.remove(...classes);
       if (this.readingDeviceMode) return;
-      if (this.activeTool === "pen" || this.activeTool === "highlighter") pdfContainer.classList.add("drive-drawing-active");
-      else if (this.activeTool === "eraser") pdfContainer.classList.add("drive-eraser-active");
-      else if (this.activeTool === "text") pdfContainer.classList.add("drive-text-active");
-      else if (this.activeTool === "select") pdfContainer.classList.add("drive-select-active");
+      var pdfContainer = innerContainer || container;
+      if (this.activeTool === "pen") {
+        pdfContainer.classList.add("drive-drawing-active", "drive-pen-active");
+      } else if (this.activeTool === "highlighter") {
+        pdfContainer.classList.add("drive-drawing-active", "drive-highlighter-active");
+      } else if (this.activeTool === "eraser") {
+        pdfContainer.classList.add("drive-eraser-active");
+      } else if (this.activeTool === "text") {
+        pdfContainer.classList.add("drive-text-active");
+      } else if (this.activeTool === "select") {
+        pdfContainer.classList.add("drive-select-active");
+      }
     });
   }
 
@@ -3813,7 +4008,10 @@ class HighlighterPlugin extends obsidian.Plugin {
     };
 
     box.onpointermove = (e) => {
-      if (this.readingDeviceMode || this.activeTool !== "text" || isDragging) return;
+      if (this.readingDeviceMode || this.activeTool !== "text" || isDragging) {
+        if (this.activeTool !== "text" && box.style.cursor) box.style.cursor = "";
+        return;
+      }
       var rect = box.getBoundingClientRect();
       var edgeDist = getEdgeDist();
       var isEdge =
@@ -3919,6 +4117,7 @@ class HighlighterPlugin extends obsidian.Plugin {
           this.hasExplicitUserDeletion = true;
           this.localDirty = true;
         }
+        if (this.activeTextBoxId === item.id) this.activeTextBoxId = null;
         box.remove();
         this.renderDataVersion++;
       } else {
@@ -4203,6 +4402,9 @@ class HighlighterPlugin extends obsidian.Plugin {
         this.deletedIds[id] = now;
         this.sessionErasedIds.add(id);
       });
+      if (this.activeTextBoxId && toDelete.has(this.activeTextBoxId)) {
+        this.activeTextBoxId = null;
+      }
 
       this.pdfHighlights[normPath] = items.filter((a) => !toDelete.has(a.id));
       this.hasErased = true;
