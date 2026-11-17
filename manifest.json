@@ -1,7 +1,7 @@
 {
   "id": "highlighter-ink",
   "name": "Simple Highlighter",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minAppVersion": "1.7.2",
   "description": "A pseudo-native plugin that adds core functionality to the PDF reader.",
   "author": "Yiangos",
